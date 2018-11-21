@@ -31,6 +31,8 @@ local scene = composer.newScene( sceneName )
 -- local variables for the scene
 local bkg
 
+local youLoseSound = audio.loadSound( "Sounds/YouLose.mp3" )
+local youLoseSoundChannel
 ----------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS
@@ -49,7 +51,7 @@ function scene:create( event )
     bkg.y = display.contentCenterY
     bkg.width = display.contentWidth
     bkg.height = display.contentHeight
-   
+    youLoseSoundChannel = audio.play(youLoseSound)
     -- Associating display objects with this scene 
     sceneGroup:insert( bkg )
   

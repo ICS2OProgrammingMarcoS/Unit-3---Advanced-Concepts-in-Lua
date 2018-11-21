@@ -39,6 +39,8 @@ local platform2
 local platform3
 local platform4
 
+local youWin
+
 local spikes1
 local spikes2
 local spikes3
@@ -58,22 +60,34 @@ local numLives = 2
 
 local rArrow 
 local uArrow
+local lArrow
 
 local motionx = 0
-local SPEED = 5
+local SPEED = 6
+local nSPEED = -6
 local LINEAR_VELOCITY = -100
-local GRAVITY = 7
+local GRAVITY = 8
 
-local leftW 
+local leftW
+local rightW 
 local topW
 local floor
 
 local ball1
 local ball2
+local ball3
 local theBall
 
 local questionsAnswered = 0
-
+-----------------------------------------------------------------------------------------
+--SOUNDS
+-----------------------------------------------------------------------------------------
+local youLoseSound = audio.loadSound( "Sounds/YouLose.mp3" )
+local youLoseSoundChannel
+local popSound = audio.loadSound( "Sounds/pop.mp3")
+local popSoundChannel
+local youWinSound = audio.loadSound( "Sounds/Cheer.m4a")
+local youWinSoundChannel
 -----------------------------------------------------------------------------------------
 -- LOCAL SCENE FUNCTIONS
 ----------------------------------------------------------------------------------------- 
@@ -89,6 +103,11 @@ local function up (touch)
     if (character ~= nil) then
         character:setLinearVelocity( 0, LINEAR_VELOCITY )
     end
+end
+
+local function left (touch)
+    motionx = nSPEED
+    character.xScale = -1
 end
 
 -- Move character horizontally
@@ -107,11 +126,13 @@ end
 local function AddArrowEventListeners()
     rArrow:addEventListener("touch", right)
     uArrow:addEventListener("touch", up)
+    lArrow:addEventListener("touch", left)
 end
 
 local function RemoveArrowEventListeners()
     rArrow:removeEventListener("touch", right)
     uArrow:removeEventListener("touch", up)
+    lArrow:removeEventListener("touch", left)
 end
 
 local function AddRuntimeListeners()
@@ -152,6 +173,8 @@ end
 local function MakeSoccerBallsVisible()
     ball1.isVisible = true
     ball2.isVisible = true
+    ball3.isVisible = true
+
 end
 
 local function MakeHeartsVisible()
@@ -174,12 +197,12 @@ local function onCollision( self, event )
     if ( event.phase == "began" ) then
 
         --Pop sound
-        popSoundChannel = audio.play(popSound)
+        
 
         if  (event.target.myName == "spikes1") or 
             (event.target.myName == "spikes2") or
             (event.target.myName == "spikes3") then
-
+            popSoundChannel = audio.play(popSound)
             -- add sound effect here
 
             -- remove runtime listeners that move the character
@@ -207,7 +230,8 @@ local function onCollision( self, event )
         end
 
         if  (event.target.myName == "ball1") or
-            (event.target.myName == "ball2") then
+            (event.target.myName == "ball2") or
+            (event.target.myName == "ball3") then
 
             -- get the ball that the user hit
             theBall = event.target
@@ -228,6 +252,9 @@ local function onCollision( self, event )
         if (event.target.myName == "door") then
             --check to see if the user has answered 5 questions
             if (questionsAnswered == 3) then
+                youWin.isVisible = true
+                character.isVisible = false
+                youWinSoundChannel = audio.play(youWinSound)
                 -- after getting 3 questions right, go to the you win screen
             end
         end        
@@ -250,6 +277,8 @@ local function AddCollisionListeners()
     ball1:addEventListener( "collision" )
     ball2.collision = onCollision
     ball2:addEventListener( "collision" )
+    ball3.collision = onCollision
+    ball3:addEventListener( "collision" )
 
     door.collision = onCollision
     door:addEventListener( "collision" )
@@ -262,6 +291,7 @@ local function RemoveCollisionListeners()
 
     ball1:removeEventListener( "collision" )
     ball2:removeEventListener( "collision" )
+    ball3:removeEventListener( "collision" )
 
     door:removeEventListener( "collision")
 
@@ -283,11 +313,13 @@ local function AddPhysicsBodies()
     physics.addBody( spikes3platform, "static", { density=1.0, friction=0.3, bounce=0.2 } )
 
     physics.addBody(leftW, "static", {density=1, friction=0.3, bounce=0.2} )
+    physics.addBody(rightW, "static", {density=1, friction=0.3, bounce=0.2} )
     physics.addBody(topW, "static", {density=1, friction=0.3, bounce=0.2} )
     physics.addBody(floor, "static", {density=1, friction=0.3, bounce=0.2} )
 
     physics.addBody(ball1, "static",  {density=0, friction=0, bounce=0} )
     physics.addBody(ball2, "static",  {density=0, friction=0, bounce=0} )
+    physics.addBody(ball3, "static",  {density=0, friction=0, bounce=0} )
 
     physics.addBody(door, "static", {density=1, friction=0.3, bounce=0.2})
 
@@ -308,6 +340,7 @@ local function RemovePhysicsBodies()
     physics.removeBody(spikes3platform)
 
     physics.removeBody(leftW)
+    physics.removeBody(rightW)
     physics.removeBody(topW)
     physics.removeBody(floor)
  
@@ -460,15 +493,32 @@ function scene:create( event )
     uArrow.x = display.contentWidth * 8.2 / 10
     uArrow.y = display.contentHeight * 8.5 / 10
 
+    lArrow = display.newImageRect("Images/LeftArrowUnpressed.png", 100, 50)
+    lArrow.x = display.contentWidth * 7.2 / 10
+    lArrow.y = display.contentHeight * 9.5 / 10
+
     -- Insert objects into the scene group in order to ONLY be associated with this scene
     sceneGroup:insert( uArrow)
+    sceneGroup:insert( lArrow)
+
+    youWin = display.newImage("Images/YouWin.png")
+    youWin.x = display.contentCenterX
+    youWin.y = display.contentCenterY
+    youWin.width = display.contentWidth
+    youWin.height = display.contentHeight
+    youWin.isVisible = false
 
     --WALLS--
     leftW = display.newLine( 0, 0, 0, display.contentHeight)
     leftW.isVisible = true
 
+    rightW = display.newLine( 0, 0, 0, display.contentHeight)
+    rightW.isVisible = true
+
     -- Insert objects into the scene group in order to ONLY be associated with this scene
     sceneGroup:insert( leftW )
+    sceneGroup:insert( rightW )
+
 
     rightW = display.newLine( 0, 0, 0, display.contentHeight)
     rightW.x = display.contentCenterX * 2
@@ -507,6 +557,15 @@ function scene:create( event )
 
     -- Insert objects into the scene group in order to ONLY be associated with this scene
     sceneGroup:insert( ball2 )
+
+    ball3 = display.newImageRect ("Images/SoccerBall.png", 70, 70)
+    ball3.x = 770
+    ball3.y = 275
+    ball3.myName = "ball3"
+
+    -- Insert objects into the scene group in order to ONLY be associated with this scene
+    sceneGroup:insert( ball3 )
+
 
 end --function scene:create( event )
 
