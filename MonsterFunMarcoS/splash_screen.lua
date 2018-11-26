@@ -67,27 +67,6 @@ end
 -----------------------------------------------------------------------------------------
 
 -- The function called when the screen doesn't exist
-function scene:create( event )
-
-    -- Creating a group that associates objects with the scene
-    local sceneGroup = self.view
-
-    -- Insert the vampire image
-    vampire = display.newImage("Images/Vampire.PNG")
-
-
-    -- set the initial x and y position of the beetleship
-    vampire.x = display.contentWidth/2
-    vampire.y = display.contentHeight/2
-
-    vampire.height = display.contentHeight
-    vampire.width =  display.contentWidth
-    vampire.isVisible = false
-
-    -- Insert objects into the scene group in order to ONLY be associated with this scene
-    sceneGroup:insert( beetleship )
-
-end -- function scene:create( event )
 
 -- The function called when the screen doesn't exist
 function scene:create( event )
@@ -107,9 +86,22 @@ function scene:create( event )
     vampireWaving.width = display.contentWidth
     vampireWaving.isVisible = false
 
-    -- Insert objects into the scene group in order to ONLY be associated with this scene
-    sceneGroup:insert( beetleship )
+    -- Insert the vampire image
+    vampire = display.newImage("Images/Vampire.PNG")
 
+
+    -- set the initial x and y position of the beetleship
+    vampire.x = display.contentWidth/2
+    vampire.y = display.contentHeight/2
+
+    vampire.height = display.contentHeight
+    vampire.width =  display.contentWidth
+    vampire.isVisible = false
+
+
+    -- Insert objects into the scene group in order to ONLY be associated with this scene
+    sceneGroup:insert( vampireWaving )
+    sceneGroup:insert( vampire )
 end -- function scene:create( event )
 
 --------------------------------------------------------------------------------------------
